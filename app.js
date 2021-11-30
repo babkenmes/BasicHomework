@@ -65,7 +65,8 @@ app.post('/api/people', async (req, res) => {
     }
     
 })
-
+//TODO add modify person
+//TODO add delete person
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
