@@ -4,7 +4,8 @@ const Schema = mongoose.Schema
 const Person = new Schema({
     name: { required: true, type: String },
     age: { type: Number, required: true, default: 18 },
-    salary: { type: Number, default: 1000000 }
+    salary: { type: Number, default: 1000000 },
+    img: { type: String }
 })
 
 module.exports = mongoose.model('Person', Person);

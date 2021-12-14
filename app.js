@@ -1,26 +1,21 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 const mongoose = require("mongoose")
 const bodyParser = require('body-parser')
 const Person = require("./Models/Person")
+const multer = require("multer")
+mongoose
+    .connect(
+        ' mongodb+srv://albertdb:albertdb449@cluster0.wyknk.mongodb.net/sampletest?retryWrites=true&w=majority',
+        {
+            useNewUrlParser: true,
+        }
+    )
+    .then(() => console.log('mongodb conected'))
+    .catch(err => console.log(err));
 
-const { DB_CONNECTION_STRING } = process.env
-
-mongoose.connect(DB_CONNECTION_STRING)
-const db = mongoose.connection
-
-db.once('open', async function () {
-
-
-    console.log('MongoDB successfully connected');
-
-})
-
-db.on('error', function (err) {
-    console.log(err);
-});
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -29,42 +24,45 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 
-app.get('/api/people', async (req, res) => {
-    try {
-        const people = await Person.find()
-        res.send(people)
+const UsersSchema = new mongoose.Schema({
+    imgname: {
+        type: String,
+        required: true,
     }
-    catch (err) {
-        res.status(500).send(err)
-    }
+});
+
+app.get('/', (req, res) => {
+    Users.create({
+        imgname: '2.jpg',
+    })
+        .then((users) => res.send(users))
+        .catch((err) => res.send(err));
 })
 
-app.get('/api/people/:id', async (req, res) => {
-    try {
-        const id = req.params.id
-        const person = await Person.findById(id)
-        res.send(person)
-    }
-    catch (err) {
-        res.status(500).send(err)
-    }
+const Users = mongoose.model('Users', UsersSchema);
+
+
+app.get('/', (req, res) => {
+    Users.find({}, function (err, users) {
+        res.render('index', {
+            imageslist: users
+        })
+    })
 })
 
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
-
-app.post('/api/people', async (req, res) => {
-
-    try {
-        const { name, salary, age } = req.body;
-        const person = new Person({ name, salary, age })
-        await person.save()
-        res.send(person)
-    }
-    catch(err){
-        res.status(500).send(err)
-    }
-    
+app.post('/upload_img',upload.single("image"),(req,res)=>{
+    const imgBase64 = req.file.buffer.toString("base64")
+    Person.create({
+        name: 'Johny',
+        img:imgBase64
+    })
+        .then((users) => res.send(users))
+        .catch((err) => res.send(err));
 })
+
 //TODO add modify person
 //TODO add delete person
 
